@@ -199,7 +199,8 @@
             android:layout_height="wrap_content"
             android:text=" молодец иди поешь"
             android:layout_gravity="top"
-            android:gravity="center_horizontal" />
+            android:gravity="center_horizontal"
+            android:id="@+id/Result" />
 
         <Button
             android:layout_width="wrap_content"

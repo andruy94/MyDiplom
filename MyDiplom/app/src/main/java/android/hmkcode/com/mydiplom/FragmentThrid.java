@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -31,7 +32,7 @@ public class FragmentThrid extends Fragment {
     ListView list;
     protected View view;
     DBWorker dbWorker;
-    CustomListAdapter adapter;
+    CustomListAdapter adapter=null;
     TextView tVinfo;
     Handler h;
     List<PictureDscr> Pics;
@@ -84,10 +85,9 @@ public class FragmentThrid extends Fragment {
                         break;
                     case 2:
                         if(getActivity()!=null) {
-                            adapter=new CustomListAdapter(getActivity(), Pics,
-                                    dbWorker.GetColumn(DBWorker.DBHelper.Filename));
-                            adapter.notifyDataSetChanged();
+                            adapter=new CustomListAdapter(getActivity(), Pics);
                             list.setAdapter(adapter);
+
                         }
                         else
                             Log.e(MainActivity.TAG,"I am Fat Bug");
@@ -101,6 +101,7 @@ public class FragmentThrid extends Fragment {
                                     intent.putExtra(DBWorker.DBHelper.Answer, Pics.get(position).Answer);
                                     intent.putExtra(DBWorker.DBHelper.Hint, Pics.get(position).Hint);
                                     intent.putExtra(DBWorker.DBHelper.Points, Pics.get(position).Points);
+                                    intent.putExtra("_id",position);
                                     //getActivity().startActivity(intent);
                                     startActivityForResult(intent, 228);
                                     dbWorker.close();// отпустим DB
@@ -129,16 +130,17 @@ public class FragmentThrid extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        dbWorker.close();
+
     }
     //вот тут мы и будем апдейтить нашу таблицу
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == getActivity().RESULT_OK) {
-            PictureDscr pic = Pics.get(1);
-            pic.Points = 1000;
-            Pics.set(1, pic);
+        if (resultCode == MainActivity.RESULT_OK) {
+
+            PictureDscr pic = Pics.get(data.getIntExtra("_id",0));
+            pic.Points = data.getIntExtra(DBWorker.DBHelper.Points,666);
+            Pics.set(data.getIntExtra("_id",0), pic);
             adapter.notifyDataSetChanged();
         }
         //(new U3AsyncTask(h, dbWorker)).execute(getString(R.string.url));

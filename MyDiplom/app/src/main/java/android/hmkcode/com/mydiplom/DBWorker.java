@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +29,7 @@ public class DBWorker {
     }
 
     public void close() {
-        if (db != null)
+        if (db != null && !db.isOpen())
             db.close();
     }
 

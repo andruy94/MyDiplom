@@ -11,9 +11,12 @@ import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.IOException;
@@ -29,12 +32,18 @@ public class GameActivity extends ActionBarActivity implements View.OnClickListe
     int k=0;
     int m;
     int n;
+    int id;
     String Answer="null";
     PictureDscr pictureDscr;
     Button[] ArrayAnswerBtn;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //set up notitle
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        //set up full screen
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_main2);
         //getActionBar().setDisplayHomeAsUpEnabled(true);
         Intent intent=getIntent();
@@ -47,6 +56,7 @@ public class GameActivity extends ActionBarActivity implements View.OnClickListe
         pictureDscr.Answer=intent.getStringExtra(DBWorker.DBHelper.Answer);
         pictureDscr.Hint=intent.getStringExtra(DBWorker.DBHelper.Hint);
         pictureDscr.Points=intent.getIntExtra(DBWorker.DBHelper.Points, 666);
+        id=intent.getIntExtra("_id",0);
         Answer=pictureDscr.Answer;
         try {
             pictureDscr.DownloadPic("/MyFolder/");
@@ -169,6 +179,7 @@ public class GameActivity extends ActionBarActivity implements View.OnClickListe
                 Log.d("TAG", stringBuffer.toString() + Answer.replaceAll(" ", ""));
                 if (stringBuffer.toString().equals(Answer.replaceAll(" ", "").toUpperCase())) {
                     (findViewById(R.id.LLWin)).setVisibility(View.VISIBLE);
+                    ((TextView) findViewById(R.id.Result)).setText("Молодец, иди поешь!");
                     (findViewById(R.id.button2)).setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
@@ -184,14 +195,47 @@ public class GameActivity extends ActionBarActivity implements View.OnClickListe
                             dbWorker.updatePic(pictureDscr.filename, pictureDscr.Answer,
                                     pictureDscr.Points + 100, pictureDscr.Hint);
                             dbWorker.close();
-                            setResult(RESULT_OK, new Intent().putExtra("Point",100));
+                            Intent intent=new Intent().putExtra(DBWorker.DBHelper.Points, pictureDscr.Points+100);
+                            intent.putExtra("_id",id);
+                            setResult(RESULT_OK, intent);
                             finish();
+                        }
+                    });
+                }else{
+                    (findViewById(R.id.LLWin)).setVisibility(View.VISIBLE);
+                    ((TextView) findViewById(R.id.Result)).setText("Неправильный ответ, иди вон!");
+                    (findViewById(R.id.button2)).setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            (findViewById(R.id.LLGame)).setVisibility(View.VISIBLE);
+                            (findViewById(R.id.LLWin)).setVisibility(View.INVISIBLE);
+
+                            Toast.makeText(getApplicationContext(),"Пишем результ в DB",Toast.LENGTH_SHORT).show();
+                            DBWorker dbWorker=new DBWorker(getApplicationContext());
+                            try {
+                                dbWorker.open();
+                            } catch (SQLException e) {
+                                e.printStackTrace();
+                            }
+                            dbWorker.updatePic(pictureDscr.filename, pictureDscr.Answer,
+                                    pictureDscr.Points - 0, pictureDscr.Hint);
+                            dbWorker.close();
+                            Toast.makeText(getApplicationContext(),"Ошибочка (делаем анимацию качания)",Toast.LENGTH_SHORT).show();
+                            for ( int i=0;i<k;i++){
+                                ArrayAnswerBtn[i].setText("");
+                                buttonList.get(i).setTextColor(Color.BLACK);
+                                buttonList.get(i).setEnabled(true);
+                            }
+                            buttonList.clear();
+                            k=0;
                         }
                     });
                 }
             }
         }else {
-            setResult(RESULT_OK, new Intent().putExtra("Point", pictureDscr.Points));
+            Intent intent=new Intent().putExtra(DBWorker.DBHelper.Points,  pictureDscr.Points);
+            intent.putExtra("_id",id);
+            setResult(RESULT_OK, intent);
             finish();
         }
 
