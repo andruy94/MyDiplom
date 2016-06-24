@@ -5,64 +5,44 @@
     android:orientation="horizontal" >
 
 
-
-
-    <LinearLayout android:layout_width="match_parent"
+    <RelativeLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_gravity="top">
+        android:gravity="center" >
 
-        <TextView
-            android:id="@+id/Head"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Medium Text"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:layout_marginLeft="10dp"
-            android:layout_marginTop="5dp"
-            android:padding="2dp"
-            android:textColor="#33CC33"
-            android:layout_gravity="center_horizontal" />
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center">
-
-            <ImageView
-            android:id="@+id/Picture"
+        <ImageView
+            android:id="@+id/picture"
             android:layout_width="300dp"
             android:layout_height="wrap_content"
             android:padding="20dp"
             android:layout_gravity="center_horizontal"
             android:layout_margin="0dp"
-            android:background="#777373"
-                android:src="@drawable/pic4" />
+            android:background="#080808"
+            android:src="@drawable/pic4" />
 
-            <ImageView
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:id="@+id/Check"
-                android:background="@drawable/check" />
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:id="@+id/isCheck"
+            android:background="@drawable/check" />
 
-            <TextView
-                android:id="@+id/Picinfo"
-                android:layout_width="150dp"
-                android:layout_height="40dp"
-                android:text="TextView"
-                android:layout_marginLeft="0dp"
-                android:layout_gravity="center_horizontal"
-                android:layout_alignParentTop="false"
-                android:layout_alignParentBottom="false"
-                android:layout_alignWithParentIfMissing="false"
-                android:layout_alignParentRight="false"
-                android:layout_alignParentLeft="false"
-                android:layout_alignBaseline="@+id/Picture"
-                android:layout_alignRight="@+id/Picture"
-                android:layout_alignBottom="@+id/Picture"
-                android:background="#ffffff"
-                android:layout_marginTop="20dp" />
+        <TextView
+            android:id="@+id/tvInfo"
+            android:layout_width="150dp"
+            android:layout_height="40dp"
+            android:text="TextView"
+            android:layout_marginLeft="0dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_alignParentTop="false"
+            android:layout_alignParentBottom="false"
+            android:layout_alignWithParentIfMissing="false"
+            android:layout_alignParentRight="false"
+            android:layout_alignParentLeft="false"
+            android:layout_alignBaseline="@+id/picture"
+            android:layout_alignRight="@+id/picture"
+            android:layout_alignBottom="@+id/picture"
+            android:background="#878787"
+            android:layout_marginTop="20dp" />
+    </RelativeLayout>
 
-        </RelativeLayout>
-    </LinearLayout>
 </LinearLayout>

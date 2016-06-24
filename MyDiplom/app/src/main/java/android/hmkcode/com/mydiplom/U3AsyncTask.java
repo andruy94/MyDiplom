@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import org.apache.http.HttpResponse;
@@ -25,6 +26,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -33,6 +35,8 @@ import java.util.List;
 public class U3AsyncTask extends AsyncTask<String, Void, Void>{
     private final Handler h;
     private DBWorker dbWorker;
+    private View view;
+    private List<PictureDscr> Pics;
         public U3AsyncTask(Handler h,DBWorker dbWorker){
             this.dbWorker=dbWorker;
             this.h=h;
@@ -50,19 +54,22 @@ public class U3AsyncTask extends AsyncTask<String, Void, Void>{
                 // 2. make POST request to the given URL
                 HttpPost httpPost = new HttpPost(urls[0]);
                 String json = "";
-                JSONArray jsonArrayPoints=new JSONArray();
-                JSONArray jsonArrayPic=new JSONArray();
                 // 3. build jsonObject
                 List<PictureDscr> Pics= dbWorker.GetAllPics();
+                JSONArray Pics_id=new JSONArray();
+                JSONArray Pics_Points=new JSONArray();// получаем массив Очков
                 for(int i=0;i<Pics.size();i++){
-                    jsonArrayPic.put(i,Pics.get(i).filename);
-                    jsonArrayPoints.put(i,Pics.get(i).Points);
+                    Pics_id.put(i,Pics.get(i).id);
+                    Pics_Points.put(i, Pics.get(i).Points);
                 }
-                JSONArray jsonArray=new JSONArray();
-                jsonArray.put(0,jsonArrayPic);
-                jsonArray.put(1,jsonArrayPoints);
+                JSONObject jsonObject=new JSONObject();
+                jsonObject.put("login","Admin");
+                jsonObject.put("password","123456789xxx");
+                jsonObject.put("Pics_id",Pics_id);
+                jsonObject.put("Points",Pics_Points);
                 // 4. convert JSONObject to JSON to String
-                json=jsonArray.toString();
+                json=jsonObject.toString();
+                Log.d(MainActivity.TAG,json);
                 // 5. set json to StringEntity
                 StringEntity se = new StringEntity(json);
                 // 6. set httpPost Entity
@@ -75,35 +82,41 @@ public class U3AsyncTask extends AsyncTask<String, Void, Void>{
                 // 9. receive response as inputStream and Parse Json
                 InputStream inputStream = httpResponse.getEntity().getContent();
                 String buffer=convertInputStreamToString(inputStream);
-                JSONArray jsonFilename,jsonAnswer,jsonUrl,jsonPoints,jsonHint;
+                JSONArray jsonFilename,jsonAnswer,jsonUrl,jsonPoints,jsonHint,jsonid;
+                Log.d(MainActivity.TAG,buffer.toString()+"php");
                 try {
                     JSONObject dataJsonObj = new JSONObject(buffer.toString());
+                    jsonid = dataJsonObj.getJSONArray("id");
                     jsonUrl = dataJsonObj.getJSONArray("Url");
                     jsonAnswer = dataJsonObj.getJSONArray("Answer");
                     jsonFilename = dataJsonObj.getJSONArray("Name");
-                    jsonPoints = dataJsonObj.getJSONArray("Point");
-                    //jsonHint=dataJsonObj.getJSONArray("Hint");
+                    jsonPoints = dataJsonObj.getJSONArray("Points");
+                    jsonHint=dataJsonObj.getJSONArray("Hint");
                 }catch (JSONException e) {
                     Log.e(MainActivity.TAG, "не можем взять JSONARRAy");
                     h.sendEmptyMessage(666);
                     // если не получиться распарсить JSON то нет смысла дальше что-то делать, выходим из потока и переходим к U2
+                    h.sendEmptyMessage(1);
                     return null;// выход
                 }
                 for (int i = 0; i < jsonFilename.length(); i++) {
                     try{
+                        Integer id=jsonid.getInt(i);
                         String filename=jsonFilename.getString(i);
                         String Answer = jsonAnswer.getString(i);
                         Integer Point = jsonPoints.getInt(i);
-                        String Hint = "null";//jsonHint.getString(i);
+                        String Hint = jsonHint.getString(i);
                         if(!jsonUrl.getString(i).equals("null")) {//сохраняем фотку
                             Log.d("TAG",filename+"U3");
+                            Log.d(MainActivity.TAG,jsonUrl.getString(i));
                             URL networkUrl = new URL(jsonUrl.getString(i));
                             Bitmap networkBitmap = BitmapFactory.decodeStream(networkUrl.openConnection().getInputStream());
                             PictureDscr.SavePic(filename, "/MyFolder/", networkBitmap);//"/com.studio1101/data/"
-                            dbWorker.insertPic(filename, Answer, Point, Hint);
+                            dbWorker.insertPic(id, filename, Answer, Point, Hint);
+                            Log.d("TAG", id + filename + "_" + Answer + "_" + Point + "U3if");
                         }else {
-                            dbWorker.updatePic(filename, Answer, Point, Hint);
-                            Log.d("TAG", filename +"_"+Answer+"_"+Point+ "U3else");
+                            dbWorker.updatePic(id, filename, Answer, Point, Hint);
+                            Log.d("TAG",id+filename +"_"+Answer+"_"+Point+ "U3else");
                         }
                     }catch (IOException e) { // здесь необходим блок отслеживания реальных ошибок и исключений, общий Exception приведен в качестве примера
                         h.sendEmptyMessage(666);// ошибка где-то
@@ -126,6 +139,10 @@ public class U3AsyncTask extends AsyncTask<String, Void, Void>{
             }
             h.sendEmptyMessage(1);// если всё же удалась наша затея или не удалась
             return null;
+
+
+            //-------------
+
         }
 
     protected void onPostExecute(Void result) {// тут нам приходит наш прекрасный результат

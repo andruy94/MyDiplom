@@ -34,16 +34,16 @@ public class CustomListAdapter extends ArrayAdapter<PictureDscr> {
     public View getView(final int position,View view,ViewGroup parent) {
         LayoutInflater inflater=context.getLayoutInflater();
         View rowView=inflater.inflate(R.layout.mylist, null,true);
-        TextView txtTitle = (TextView) rowView.findViewById(R.id.Head);
-        imageView = (ImageView) rowView.findViewById(R.id.Picture);
-        TextView extratxt = (TextView) rowView.findViewById(R.id.Picinfo);
-        txtTitle.setText(pics.get(position).filename);
-        extratxt.setText("очки: "+pics.get(position).Points+"");
+        //TextView txtTitle = (TextView) rowView.findViewById(R.id.Head);
+        imageView = (ImageView) rowView.findViewById(R.id.picture);
+        TextView extratxt = (TextView) rowView.findViewById(R.id.tvInfo);
+        //txtTitle.setText(pics.get(position).filename);
+        extratxt.setText("очки: "+pics.get(position).Points);
         imageView.setImageBitmap(pics.get(position).bitmap);
-        if(pics.get(position).Points>=100){
-            rowView.findViewById(R.id.Check).setVisibility(View.VISIBLE);
+        if(pics.get(position).Points>1){
+            rowView.findViewById(R.id.isCheck).setVisibility(View.VISIBLE);
         }else
-            rowView.findViewById(R.id.Check).setVisibility(View.INVISIBLE);
+            rowView.findViewById(R.id.isCheck).setVisibility(View.INVISIBLE);
         return rowView;
 
     }

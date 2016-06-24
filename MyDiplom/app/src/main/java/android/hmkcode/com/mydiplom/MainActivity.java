@@ -20,6 +20,14 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 public class MainActivity extends ActionBarActivity {
+    /**TO DO LIST
+     * !!!Переписать алгоритм заполнения кнопок!!!
+     * объеденить DBWorker и DBHelper
+     * переписать загрузку изображений под пикассо
+     * сделать систему авторизации (пока не делать регистрацию, а просто брать инфу об устройстве и на этом строить логин)
+     * Убрать Хендлер и в будущем переписать всё на retrofit
+     * сделать вкладку об авторе
+     **/
     private DrawerLayout myDrawerLayout;// то что содержит фреймы и менюшку
     private ListView myDrawerList;
     private ActionBarDrawerToggle myDrawerToggle;// отвечает за обработку состояния

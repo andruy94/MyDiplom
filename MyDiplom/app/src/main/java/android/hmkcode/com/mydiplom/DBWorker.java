@@ -2,6 +2,7 @@ package android.hmkcode.com.mydiplom;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -33,24 +34,26 @@ public class DBWorker {
             db.close();
     }
 
-    public long insertPic(String FileName, String Answer, Integer Point,String Hint) {
+    public long insertPic(Integer id,String FileName, String Answer, Integer Point,String Hint) {//на вход должен идти класс
         ContentValues cv=new ContentValues();
-        cv.put(DBWorker.DBHelper.TableColumn[0],FileName);
-        cv.put(DBWorker.DBHelper.TableColumn[1],Answer);
-        cv.put(DBWorker.DBHelper.TableColumn[2], Point);
-        cv.put(DBWorker.DBHelper.TableColumn[3], Hint);
+        cv.put(DBWorker.DBHelper.TableColumn[0],id);
+        cv.put(DBWorker.DBHelper.TableColumn[1],FileName);
+        cv.put(DBWorker.DBHelper.TableColumn[2],Answer);
+        cv.put(DBWorker.DBHelper.TableColumn[3], Point);
+        cv.put(DBWorker.DBHelper.TableColumn[4], Hint);
 
             return db.insert(DBWorker.DBHelper.TableName, null, cv);
 
     }
 
-    public long updatePic(String FileName, String Answer, Integer Point,String Hint) {
+    public long updatePic(int id,String FileName, String Answer, Integer Point,String Hint) {//на вход должен идти класс
         ContentValues cv=new ContentValues();
-        cv.put(DBWorker.DBHelper.TableColumn[1],Answer);
-        cv.put(DBWorker.DBHelper.TableColumn[2], Point);
-        cv.put(DBWorker.DBHelper.TableColumn[3], Hint);
+        cv.put(DBWorker.DBHelper.TableColumn[1],FileName);
+        cv.put(DBWorker.DBHelper.TableColumn[2],Answer);
+        cv.put(DBWorker.DBHelper.TableColumn[3], Point);
+        cv.put(DBWorker.DBHelper.TableColumn[4], Hint);
         return db.update(DBWorker.DBHelper.TableName, cv, DBHelper.TableColumn[0] + "= ?",
-                new String[]{FileName});
+                new String[]{id+""});
     }
 
     public List<String> GetColumn(String ColumnName){
@@ -70,19 +73,20 @@ public class DBWorker {
     public List<PictureDscr> GetAllPics(){
         List<PictureDscr> Pics=new ArrayList<PictureDscr>();
         Cursor c = db.query(DBWorker.DBHelper.TableName,null , null, null, null, null, null);
-        if(c.moveToFirst()) {
-            do {
-                PictureDscr pic=new PictureDscr();
-                int filenameColIndex = c.getColumnIndex(DBHelper.Filename);
-                pic.filename = c.getString(filenameColIndex);
-                pic.Answer = c.getString(c.getColumnIndex(DBHelper.Answer));
-                pic.Points = c.getInt(c.getColumnIndex(DBHelper.Points));
-                pic.Hint = c.getString(c.getColumnIndex(DBHelper.Hint));
-                Pics.add(pic);
-            }while (c.moveToNext());
-        }else {
-            Log.d(MainActivity.TAG, "cursor=null");
-        }
+            if (c.moveToFirst()) {
+                do {
+                    PictureDscr pic = new PictureDscr();
+                    pic.id = c.getInt(c.getColumnIndex(DBHelper.id));
+                    int filenameColIndex = c.getColumnIndex(DBHelper.Filename);
+                    pic.filename = c.getString(filenameColIndex);
+                    pic.Answer = c.getString(c.getColumnIndex(DBHelper.Answer));
+                    pic.Points = c.getInt(c.getColumnIndex(DBHelper.Points));
+                    pic.Hint = c.getString(c.getColumnIndex(DBHelper.Hint));
+                    Pics.add(pic);
+                } while (c.moveToNext());
+            } else {
+                Log.d(MainActivity.TAG, "cursor=null");
+            }
         return Pics;
     }
 
@@ -91,6 +95,7 @@ public class DBWorker {
                 null);
         PictureDscr pic=new PictureDscr();
         if(c.moveToFirst()) {
+            pic.id=c.getInt(c.getColumnIndex(DBHelper.id));
             int filenameColIndex = c.getColumnIndex(DBHelper.Filename);
             pic.filename = c.getString(filenameColIndex);
             pic.Answer = c.getString(c.getColumnIndex(DBHelper.Answer));
@@ -117,20 +122,22 @@ public class DBWorker {
         return db;// может понадобиться
     }
 
-
+    // логичней сделать один класс а не класс в классе
     /**
      * Created by Андрей on 14.02.2016.
      */
     static public class DBHelper extends SQLiteOpenHelper {
         public static String[] TableColumn = {
+                "_id",
                 "FileName",
                 "Answer",
                 "Points",
                 "Hint"};
-        public static String Filename=TableColumn[0];
-        public static String Answer=TableColumn[1];
-        public static String Points=TableColumn[2];
-        public static String Hint=TableColumn[3];
+        public static String id      =TableColumn[0];
+        public static String Filename=TableColumn[1];
+        public static String Answer  =TableColumn[2];
+        public static String Points  =TableColumn[3];
+        public static String Hint    =TableColumn[4];
 
         public static String TableName = "Gametable";
 
@@ -144,10 +151,11 @@ public class DBWorker {
             Log.d("TAG", "--- onCreate database ---");
             // создаем таблицу с полями
             db.execSQL("create table " + TableName + " ("
-                    + TableColumn[0] + " text primary key,"
-                    + TableColumn[1] + " text,"
-                    + TableColumn[2] + " INTEGER,"
-                    + TableColumn[3] + " text );");
+                    + TableColumn[0]+ " INTEGER primary key,"
+                    + TableColumn[1]+ " text,"
+                    + TableColumn[2]+ " text,"
+                    + TableColumn[3]+ " INTEGER,"
+                    + TableColumn[4]+ " text );");
         }
 
         @Override

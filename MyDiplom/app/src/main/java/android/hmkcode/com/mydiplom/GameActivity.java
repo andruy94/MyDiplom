@@ -32,7 +32,6 @@ public class GameActivity extends ActionBarActivity implements View.OnClickListe
     int k=0;
     int m;
     int n;
-    int id;
     String Answer="null";
     PictureDscr pictureDscr;
     Button[] ArrayAnswerBtn;
@@ -45,18 +44,18 @@ public class GameActivity extends ActionBarActivity implements View.OnClickListe
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_main2);
-        //getActionBar().setDisplayHomeAsUpEnabled(true);
+
         Intent intent=getIntent();
         //Typeface tf = Typeface.createFromAsset(this.getAssets(), "fonts/sawesome.ttf");
         //EditText textView=(EditText)findViewById(R.id.editText);
         //textView.setTypeface(tf);
 
         pictureDscr=new PictureDscr();
+        pictureDscr.id=intent.getIntExtra(DBWorker.DBHelper.id, -1);
         pictureDscr.filename=intent.getStringExtra(DBWorker.DBHelper.Filename);
         pictureDscr.Answer=intent.getStringExtra(DBWorker.DBHelper.Answer);
         pictureDscr.Hint=intent.getStringExtra(DBWorker.DBHelper.Hint);
         pictureDscr.Points=intent.getIntExtra(DBWorker.DBHelper.Points, 666);
-        id=intent.getIntExtra("_id",0);
         Answer=pictureDscr.Answer;
         try {
             pictureDscr.DownloadPic("/MyFolder/");
@@ -64,15 +63,8 @@ public class GameActivity extends ActionBarActivity implements View.OnClickListe
             e.printStackTrace();
         }
 
-        setTitle(pictureDscr.filename);
-//        Toast.makeText(this,,Toast.LENGTH_SHORT).show();
         ((ImageView)this.findViewById(R.id.imageView)).setImageBitmap(pictureDscr.bitmap);
-        ((ImageView) this.findViewById(R.id.imageView)).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                finish();
-            }
-        });
+        ((ImageView) this.findViewById(R.id.imageView)).setOnClickListener(this);
         findViewById(R.id.button).setOnClickListener(this);
         LinearLayout LBtn1=(LinearLayout) findViewById(R.id.Lbutton1);
         LinearLayout LBtn2=(LinearLayout) findViewById(R.id.Lbutton3);
@@ -80,9 +72,9 @@ public class GameActivity extends ActionBarActivity implements View.OnClickListe
         Button[] ArrayButton1=new Button[LBtn1.getChildCount()];
         Button[] ArrayButton2=new Button[LBtn2.getChildCount()];
         Button[] ArrayButton3=new Button[LBtn3.getChildCount()];
-        int k2=65;
+        int k2=65;//начало первой буквы
 
-        for (int i=0,j=0;i<LBtn1.getChildCount();i++){
+        for (int i=0,j=0;i<LBtn1.getChildCount();i++){//плохая логика
             ArrayButton1[i]=((Button) LBtn1.getChildAt(i));
             if(i%2==0 && Answer.length()>j){
                 if(  Answer.charAt(j)!=' ')
@@ -126,7 +118,7 @@ public class GameActivity extends ActionBarActivity implements View.OnClickListe
         n=(LAnswBtnlen-Answer.length())/2;
         ArrayAnswerBtn = new Button[LAnswBtnlen-m-n-tmp];
         char c='1';
-        for (int i=0, j=0,z=0;i<LAnswBtnlen;i++){
+        for (int i=0, j=0,z=0;i<LAnswBtnlen;i++){//плохая логика
             int p=LAnswBtnlen-n-1;
 
             if(z<Answer.length())
@@ -146,17 +138,7 @@ public class GameActivity extends ActionBarActivity implements View.OnClickListe
         }
 
     }
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            // Respond to the action bar's Up/Home button
-            case android.R.id.home:
-                //NavUtils.navigateUpFromSameTask(this);
-                //startActivity(new Intent(Main2Activity.this,MainActivity.class));
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
+
 
     @Override
     public void onClick(View view) {
@@ -192,11 +174,11 @@ public class GameActivity extends ActionBarActivity implements View.OnClickListe
                             } catch (SQLException e) {
                                 e.printStackTrace();
                             }
-                            dbWorker.updatePic(pictureDscr.filename, pictureDscr.Answer,
+                            dbWorker.updatePic(pictureDscr.id,pictureDscr.filename, pictureDscr.Answer,
                                     pictureDscr.Points + 100, pictureDscr.Hint);
                             dbWorker.close();
                             Intent intent=new Intent().putExtra(DBWorker.DBHelper.Points, pictureDscr.Points+100);
-                            intent.putExtra("_id",id);
+                            intent.putExtra(DBWorker.DBHelper.id,pictureDscr.id);
                             setResult(RESULT_OK, intent);
                             finish();
                         }
@@ -217,8 +199,11 @@ public class GameActivity extends ActionBarActivity implements View.OnClickListe
                             } catch (SQLException e) {
                                 e.printStackTrace();
                             }
-                            dbWorker.updatePic(pictureDscr.filename, pictureDscr.Answer,
-                                    pictureDscr.Points - 0, pictureDscr.Hint);
+                            if(pictureDscr.Points>-50) {//меньше 50очков глупо получать человеку
+                                pictureDscr.Points -= 10;
+                            }
+                            dbWorker.updatePic(pictureDscr.id,pictureDscr.filename, pictureDscr.Answer,
+                                    pictureDscr.Points, pictureDscr.Hint);
                             dbWorker.close();
                             Toast.makeText(getApplicationContext(),"Ошибочка (делаем анимацию качания)",Toast.LENGTH_SHORT).show();
                             for ( int i=0;i<k;i++){
@@ -234,7 +219,7 @@ public class GameActivity extends ActionBarActivity implements View.OnClickListe
             }
         }else {
             Intent intent=new Intent().putExtra(DBWorker.DBHelper.Points,  pictureDscr.Points);
-            intent.putExtra("_id",id);
+            intent.putExtra(DBWorker.DBHelper.id,pictureDscr.id);
             setResult(RESULT_OK, intent);
             finish();
         }

@@ -14,12 +14,13 @@ import java.io.OutputStream;
  * Created by Андрей on 18.03.2016.
  */
 public class PictureDscr extends Object{
+    public Integer id;
     public String filename;
     public String Answer;
     public Integer Points;
     public String Hint;
     public Integer Empty;
-    public Bitmap bitmap;
+    public Bitmap bitmap;// очень плохо, прям адос как плохо
     public PictureDscr(){
         Empty=0;// сначала все картинки непустые
     }
@@ -33,7 +34,7 @@ public class PictureDscr extends Object{
         fOut.flush();// принудительная очитска буфера
         fOut.close();
     }
-    public void DownloadPic(String dir) throws IOException{// это плохо что он статичный
+    public void DownloadPic(String dir) throws IOException{
         File text1=new File(Environment.getExternalStorageDirectory().getPath() + dir);// пишем директорию
         File inputFile=new File(text1,filename);//имя файла
         FileInputStream fis = new FileInputStream(inputFile);

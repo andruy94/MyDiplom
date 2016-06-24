@@ -52,7 +52,6 @@ public class FragmentThrid extends Fragment {
         list=(ListView) view.findViewById(R.id.list);
 
         view.findViewById(R.id.progressBar).setVisibility(View.VISIBLE);
-        //adapter.setNotifyOnChange(true);
         dbWorker = new DBWorker(getActivity());
         tVinfo.setText("Идёт загрузка");
 
@@ -63,8 +62,8 @@ public class FragmentThrid extends Fragment {
                 switch (msg.what){
                     case 0:
                         k++;
-                        k%=5;
-                        tVinfo.setText("Загрузка "+k+'/'+msg.arg1);
+                        k%=msg.arg1+1;
+                        tVinfo.setText("Загрузка "+k+'/'+msg.arg1);//@argument for AsyncTask
                         break;
                     case 1:
                         new Thread(new Runnable() {
@@ -86,31 +85,39 @@ public class FragmentThrid extends Fragment {
                     case 2:
                         if(getActivity()!=null) {
                             adapter=new CustomListAdapter(getActivity(), Pics);
-                            list.setAdapter(adapter);
+                            list.setAdapter(adapter);//@argument for AsyncTask
 
                         }
                         else
                             Log.e(MainActivity.TAG,"I am Fat Bug");
                         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                             @Override
-                            public void onItemClick(AdapterView<?> parent, View view,int position, long id) {
+                            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                                 // TODO Auto-generated method stub
-                                if(Pics.get(position).Points<100) {
+                                if (Pics.get(position).Points < 1) {
+                                    adapter.notifyDataSetChanged();
                                     Intent intent = new Intent(getActivity(), GameActivity.class);
+                                    intent.putExtra(DBWorker.DBHelper.id, Pics.get(position).id);
                                     intent.putExtra(DBWorker.DBHelper.Filename, Pics.get(position).filename);// передаём имя  картинку
                                     intent.putExtra(DBWorker.DBHelper.Answer, Pics.get(position).Answer);
                                     intent.putExtra(DBWorker.DBHelper.Hint, Pics.get(position).Hint);
                                     intent.putExtra(DBWorker.DBHelper.Points, Pics.get(position).Points);
-                                    intent.putExtra("_id",position);
-                                    //getActivity().startActivity(intent);
                                     startActivityForResult(intent, 228);
-                                    dbWorker.close();// отпустим DB
-                                }else
-                                    Toast.makeText(getActivity(),"Это уже было угадано",Toast.LENGTH_SHORT).show();
+                                    dbWorker.close();// отпустим DB*/
+                                } else {
+                                    Toast.makeText(getActivity(), "Это уже было угадано", Toast.LENGTH_SHORT).show();
+                                    dbWorker.updatePic(Pics.get(position).id, Pics.get(position).filename,
+                                            Pics.get(position).Answer, Pics.get(position).Points - 100, Pics.get(position).Hint);
+                                    Pics.get(position).Points = Pics.get(position).Points - 100;
+                                    adapter.notifyDataSetChanged();
+                                }
                             }
                         });
                         tVinfo.setText("");
-                        view.findViewById(R.id.progressBar).setVisibility(View.INVISIBLE);
+                        view.findViewById(R.id.progressBar).setVisibility(View.INVISIBLE);//@argument for AsyncTask
+                        if(adapter.getCount()==0){
+                            tVinfo.setText("Ошбика подключения, попробуйте ещё раз");
+                        }
                         break;
                 }
             }
@@ -118,11 +125,12 @@ public class FragmentThrid extends Fragment {
 
         try {
             dbWorker.open();
+            (new U3AsyncTask(h, dbWorker)).execute(getString(R.string.url));
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-        (new U3AsyncTask(h, dbWorker)).execute(getString(R.string.url));
+
         return view;
     }
 
@@ -135,12 +143,20 @@ public class FragmentThrid extends Fragment {
     //вот тут мы и будем апдейтить нашу таблицу
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == MainActivity.RESULT_OK) {
+        super.onActivityResult(requestCode, resultCode, data);//крч тут проблема с id в списке, очень тупо выходит
+        if (resultCode == MainActivity.RESULT_OK) {//костыли, везде костыли:/
+            PictureDscr pic = Pics.get(0);
+            int k=0;
+            for (PictureDscr tmp:Pics){
+                if(tmp.id==data.getIntExtra(DBWorker.DBHelper.id,0)) {
+                    pic = tmp;
+                    break;
+                }
+                k++;
+            }
 
-            PictureDscr pic = Pics.get(data.getIntExtra("_id",0));
             pic.Points = data.getIntExtra(DBWorker.DBHelper.Points,666);
-            Pics.set(data.getIntExtra("_id",0), pic);
+            Pics.set(k, pic);
             adapter.notifyDataSetChanged();
         }
         //(new U3AsyncTask(h, dbWorker)).execute(getString(R.string.url));
