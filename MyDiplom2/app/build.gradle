@@ -1,0 +1,45 @@
+apply plugin: 'com.android.application'
+
+android {
+    signingConfigs {
+        config {
+            keyAlias 'MyAndroidKey'
+            keyPassword 'myKeyPassword'
+            storeFile file('C:/Users/Андрей/keystores/android.jks')
+            storePassword '1233War1234'
+        }
+    }
+    compileSdkVersion 23
+    buildToolsVersion "23.0.3"
+    useLibrary 'org.apache.http.legacy'
+    defaultConfig {
+        applicationId "com.andrey.mydiplom"
+        minSdkVersion 15
+        targetSdkVersion 21
+        versionName "1.0"
+        signingConfig signingConfigs.config
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.config
+        }
+    }
+    productFlavors {
+        free {
+            minSdkVersion 15
+            signingConfig signingConfigs.config
+            applicationId 'com.andrey.mydiplom'
+            targetSdkVersion 21
+            versionCode 4
+            versionName '1.0'
+        }
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    testCompile 'junit:junit:4.12'
+    compile 'com.android.support:appcompat-v7:23.4.0'
+}

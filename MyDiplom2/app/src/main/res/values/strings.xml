@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">Угадай группу</string>
+    <string name="action_settings">Settings</string>
+    <string-array name="views_array">
+        <item>Лента</item>
+    </string-array>
+    <string name="url">http://studio1101.co.nf/test.php/</string>
+    <string name="menu">Меню</string>
+    <string name="first_screen">Помощь</string>
+    <string name="second_screen">Настройки</string>
+    <string name="third_screen">Лента228</string>
+    <string name="open_menu">Open</string>
+    <string name="close_menu">Close</string>
+    <string name="hint">\?</string>
+    <string name="del">	&#9666;</string>
+</resources>
