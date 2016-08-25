@@ -1,6 +1,8 @@
 package com.andrey.mydiplom;
 
 
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
@@ -11,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -102,8 +105,8 @@ public class FragmentList extends Fragment {
                                 } else {
                                     Toast.makeText(getActivity(), "Обнуление ребуса", Toast.LENGTH_SHORT).show();
                                     dbWorker.updatePic(Pics.get(position).id, Pics.get(position).filename,
-                                            Pics.get(position).Answer, Pics.get(position).Points - 100, Pics.get(position).Hint);
-                                    Pics.get(position).Points = Pics.get(position).Points - 100;
+                                            Pics.get(position).Answer, 0, Pics.get(position).Hint);
+                                    Pics.get(position).Points = 0;
                                     adapter.notifyDataSetChanged();
                                 }
                             }
@@ -139,7 +142,7 @@ public class FragmentList extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == MainActivity.RESULT_OK) {
+        if (resultCode == MainActivity.RESULT_OK && data!=null) {
             PictureDscr pic = Pics.get(0);
             int k=0;
             for (PictureDscr tmp:Pics){
@@ -155,4 +158,6 @@ public class FragmentList extends Fragment {
             adapter.notifyDataSetChanged();
         }
     }
+
+
 }

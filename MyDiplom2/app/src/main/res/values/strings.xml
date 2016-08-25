@@ -3,6 +3,7 @@
     <string name="action_settings">Settings</string>
     <string-array name="views_array">
         <item>Лента</item>
+        <item>Сброс</item>
     </string-array>
     <string name="url">http://studio1101.co.nf/test.php/</string>
     <string name="menu">Меню</string>
@@ -13,4 +14,10 @@
     <string name="close_menu">Close</string>
     <string name="hint">\?</string>
     <string name="del">	&#9666;</string>
+    <string name="SharedPref">Info</string>
+    <string name="Login">Login</string>
+    <string name="Password">Password</string>
+
+<!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

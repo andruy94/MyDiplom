@@ -4,10 +4,16 @@ package com.andrey.mydiplom;
  * Created by Андрей on 08.04.2016.
  */
 
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -19,14 +25,18 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-
+/*
+*id удалённой штуки=4;
+ */
 public class GameActivity extends AppCompatActivity implements View.OnClickListener{
     private List<Button> buttonList=new ArrayList<Button>();
+    private AlertDialog alert=null;
     int k=0;
     int m;
     int n;
@@ -63,6 +73,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.btnDel).setOnClickListener(this);
         findViewById(R.id.btnHint).setOnClickListener(this);
         findViewById(R.id.btnBack).setOnClickListener(this);
+        findViewById(R.id.btnShare).setOnClickListener(this);
         LinearLayout LBtn1=(LinearLayout) findViewById(R.id.Lbutton1);
         LinearLayout LBtn2=(LinearLayout) findViewById(R.id.Lbutton3);
         LinearLayout LBtn3=(LinearLayout) findViewById(R.id.Lbutton2);
@@ -71,8 +82,9 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         Button[] ArrayButton2=new Button[btnCount];
         Button[] ArrayButton3=new Button[btnCount];
         int k2=65;//начало первой буквы
-
+        //генерерием символы на клавиатуре
         for (int i=0,j=0;i<btnCount;i++){//плохая логика
+            //Гененрируем первый этаж
             ArrayButton1[i]=((Button) LBtn1.getChildAt(i));
             if(i%2==0 && Answer.length()>j){
                 if(  Answer.charAt(j)!=' ')
@@ -85,27 +97,41 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                 ArrayButton1[i].setText(((char) (k2+i))+"");
             ArrayButton1[i].setOnClickListener(this);
             ArrayButton1[i].setId(234+i);
+            //Гененрируем второй этаж
             ArrayButton2[i]=((Button) LBtn2.getChildAt(i));
-            if(i%2==1 && Answer.length()>j){
-                if( Answer.charAt(j)!=' ')
-                    ArrayButton2[i].setText((Answer.charAt(j)+"").toUpperCase());
+            if(i%2==1 && Answer.length()>j) {
+                if (Answer.charAt(j) != ' ')
+                    ArrayButton2[i].setText((Answer.charAt(j) + "").toUpperCase());
+                else
+                    ArrayButton2[i].setText(((char) (k2 + i + 8)) + "");
                 j++;
             }else
-                ArrayButton2[i].setText(((char) (k2+i+8))+"");
+            ArrayButton2[i].setText(((char) (k2+i+8))+"");
             ArrayButton2[i].setOnClickListener(this);
             ArrayButton2[i].setId(2340 + i);
+            //Гененрируем третий этаж
             ArrayButton3[i]=((Button) LBtn3.getChildAt(i));
-            if(i%2==0 && Answer.length()>j){
-                if( Answer.charAt(j)!=' ')
-                    ArrayButton3[i].setText((Answer.charAt(j)+"").toUpperCase());
+            if(i%2==0 && Answer.length()>j) {
+                if (Answer.charAt(j) != ' ')
+                    ArrayButton3[i].setText((Answer.charAt(j) + "").toUpperCase());
+                else
+                    ArrayButton3[i].setText(((char) (k2 + i + 16)) + "");
                 j++;
-            }
-            else
-                ArrayButton3[i].setText(((char) (k2+i+16))+"");
-
+            }else
+            ArrayButton3[i].setText(((char) (k2+i+16))+"");
             ArrayButton3[i].setOnClickListener(this);
-            ArrayButton3[i].setId(23400+i);
+            ArrayButton3[i].setId(23400 + i);
+            Log.e(MainActivity.TAG,
+                    "1ый этаж="+ArrayButton1[i].getText().toString()+
+                            "2ой этаж="+ArrayButton2[i].getText().toString()+
+                            "3ий этаж="+ArrayButton3[i].getText().toString()
+                    );
+
+
         }
+        //Костыль_Начало !!!Ошбика ArrayButton2 на самом деле 3ий этаж!!!
+        ArrayButton2[btnCount-1].setText((Answer.charAt(Answer.length()-1) + "").toUpperCase());
+        //Костыль_Конец
         LinearLayout LAnswBtn=((LinearLayout)findViewById(R.id.Answerbutton));
         int tmp=0;
         for (int i=0;i<Answer.length();i++)
@@ -116,6 +142,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         n=(LAnswBtnlen-Answer.length())/2;
         ArrayAnswerBtn = new Button[LAnswBtnlen-m-n-tmp];
         char c='1';
+        //выполняем подготовку рабочего поля
         for (int i=0, j=0,z=0;i<LAnswBtnlen;i++){//плохая логика
             int p=LAnswBtnlen-n-1;
 
@@ -228,6 +255,19 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                 setResult(RESULT_OK, intent);
                 finish();
                 break;
+            case R.id.btnShare:
+                //Uri uri=new Uri(pictureDscr.bitmap);
+                Intent sendIntent = new Intent();
+                sendIntent.setAction(Intent.ACTION_SEND);
+                sendIntent.putExtra(Intent.EXTRA_SUBJECT, "Угадай группу по каракуле");
+                sendIntent.putExtra(Intent.EXTRA_TEXT,
+                        "Угадай группу по каракуле \n" +
+                        "https://play.google.com/apps/testing/com.andrey.mydiplom");
+                //sendIntent.putExtra(Intent.EXTRA_TEXT, "");
+                //sendIntent.putExtra(Intent.EXTRA_STREAM,getImageUri(this,pictureDscr.bitmap));
+                sendIntent.setType("text/html");
+                startActivity(Intent.createChooser(sendIntent,"Поделись мнением об игре, не будь занудой!"));
+                break;
         }
 
 
@@ -236,7 +276,32 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onBackPressed(){
-        super.onBackPressed();
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setIcon(R.drawable.icon).setTitle("Вернуться в ленту?")
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Intent intent = new Intent().putExtra(DBWorker.DBHelper.Points, pictureDscr.Points);
+                        intent.putExtra(DBWorker.DBHelper.id, pictureDscr.id);
+                        setResult(RESULT_OK, intent);
+                        dialog.cancel();
+                        finish();
+                    }
+                }).setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                alert.cancel();
+            }
+        });
+        alert = builder.create();
+        alert.show();
+
     }
 
+    public Uri getImageUri(Context inContext, Bitmap inImage) {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+        String path = MediaStore.Images.Media.insertImage(inContext.getContentResolver(), inImage, "Title", null);
+        return Uri.parse(path);
+    }
 }

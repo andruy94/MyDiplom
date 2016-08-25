@@ -95,6 +95,9 @@ public class MainActivity extends AppCompatActivity {
             case 0:
                 fragment = new FragmentList();
                 break;
+            case 1:
+                fragment=new ResetFragment();
+                break;
             default:
                 break;
         }

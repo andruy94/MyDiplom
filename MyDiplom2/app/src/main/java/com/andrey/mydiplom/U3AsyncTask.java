@@ -1,6 +1,7 @@
 package com.andrey.mydiplom;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
@@ -46,6 +47,44 @@ public class U3AsyncTask extends AsyncTask<String, Void, Void> {
         @Override
         protected Void doInBackground(String... urls) {// тут входные параметры
             try {
+                SharedPreferences sharedPreferences=context.getSharedPreferences(context.getString(R.string.SharedPref),
+                        Context.MODE_PRIVATE);
+                //Если нет логина или пароля то получаем его
+                if(sharedPreferences.getString("Login","").equals("") ||
+                        sharedPreferences.getString("Password","").equals("")){
+                    // 1. create HttpClient
+                    HttpClient httpclient = new DefaultHttpClient();
+                    // 2. make POST request to the given URL
+                    HttpPost httpPost = new HttpPost(urls[0]);
+                    String json = "";
+                    // 3. build jsonObject
+                    JSONObject jsonObject=new JSONObject();
+                    jsonObject.put("login","");
+                    jsonObject.put("password","");
+                    // 4. convert JSONObject to JSON to String
+                    json=jsonObject.toString();
+                    Log.d(MainActivity.TAG, json);
+                    // 5. set json to StringEntity
+                    StringEntity se = new StringEntity(json);
+                    // 6. set httpPost Entity
+                    httpPost.setEntity(se);
+                    // 7. Set some headers to inform server about the type of the content
+                    httpPost.setHeader("Accept", "application/json");
+                    httpPost.setHeader("Content-type", "application/json");
+                    // 8. Execute POST request to the given URL
+                    HttpResponse httpResponse = httpclient.execute(httpPost);// вот тут мы указываем что это POST
+                    // 9. receive response as inputStream and Parse Json
+                    InputStream inputStream = httpResponse.getEntity().getContent();
+                    String buffer=convertInputStreamToString(inputStream);
+                    Log.d(MainActivity.TAG, buffer.toString() + "php");
+                        JSONObject dataJsonObj = new JSONObject(buffer.toString());
+                    //в начале запишем прижедший логин
+                    SharedPreferences.Editor editor=sharedPreferences.edit();
+                    editor.putString("Login",dataJsonObj.getString("Login"));
+                    editor.putString("Password",dataJsonObj.getString("Password"));
+                    editor.apply();
+                    Log.e(MainActivity.TAG,"Login="+sharedPreferences.getString(context.getString(R.string.Login),""));
+                }
                 // 1. create HttpClient
                 HttpClient httpclient = new DefaultHttpClient();
                 // 2. make POST request to the given URL
@@ -60,8 +99,8 @@ public class U3AsyncTask extends AsyncTask<String, Void, Void> {
                     Pics_Points.put(i, Pics.get(i).Points);
                 }
                 JSONObject jsonObject=new JSONObject();
-                jsonObject.put("login","Admin");
-                jsonObject.put("password","123456789");
+                jsonObject.put("login", sharedPreferences.getString("Login",""));
+                jsonObject.put("password",sharedPreferences.getString("Password",""));
                 jsonObject.put("Pics_id",Pics_id);
                 jsonObject.put("Points",Pics_Points);
                 // 4. convert JSONObject to JSON to String
@@ -83,6 +122,7 @@ public class U3AsyncTask extends AsyncTask<String, Void, Void> {
                 Log.d(MainActivity.TAG, buffer.toString() + "php");
                 try {
                     JSONObject dataJsonObj = new JSONObject(buffer.toString());
+                    //в начале запишем прижедший логин
                     jsonid = dataJsonObj.getJSONArray("id");
                     jsonUrl = dataJsonObj.getJSONArray("Url");
                     jsonAnswer = dataJsonObj.getJSONArray("Answer");
